@@ -1,0 +1,31 @@
+# Datos y resultados (no se versionan: son pesados y se regeneran)
+mmfi_dataset/
+capturas_sync/
+capturas/
+resultados/
+*.pth
+*.bin
+*.mat
+*.ply
+*.gif
+
+# Repos de terceros (se clonan aparte; ver README)
+csi2pointcloud/
+esp-csi/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# Logs / temporales
+*.log
+entrena_log.txt
+*.tmp
+
+# Sistema
+.DS_Store
+Thumbs.db

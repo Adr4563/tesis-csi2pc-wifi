@@ -1,0 +1,21 @@
+# ---- Librerias del proyecto (PC de entrenamiento) ----
+# Python 3.10+
+
+torch>=2.0            # modelo transformer CSI2PointCloud y entrenamiento
+numpy>=1.23
+scipy>=1.9            # scipy.io para leer los .mat del CSI
+open3d>=0.17          # nubes de puntos, registro ICP, auto-nivelado del piso, visores 3D
+matplotlib>=3.6       # curvas de perdida y visualizacion GT vs predicho
+Pillow>=9.0           # GIF animado de resultados
+
+# ---- Solo en la Raspberry Pi (lectura de los ESP32) ----
+pyserial>=3.5         # lectura UART/USB de los 3 ESP32
+
+# ---- Solo en la PC de captura (acceso a la Azure Kinect) ----
+# pyk4a            # requiere el Azure Kinect SDK v1.4.1 instalado en Windows.
+#                  # No es necesario en la PC que SOLO entrena.
+
+# ---- GPU (opcional, recomendado en la universidad) ----
+# Para usar GPU NVIDIA, instalar la build de PyTorch con CUDA en vez del torch de arriba, p.ej.:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu121
+# El entrenamiento usara la GPU automaticamente si esta disponible.
