@@ -11,6 +11,41 @@ transformer que aprende a **reconstruir la nube de puntos del cuerpo humano usan
 
 ---
 
+## 0. Inicio rápido — entrenar en otra PC (p. ej. la universidad)
+
+> El **dataset ya viene en este repo** (`mmfi_dataset/`, 6 clases). Solo hace falta el repo del
+> **modelo de Määttä** (se clona al lado) e instalar las librerías.
+
+**1) Clonar los dos repos, uno al lado del otro** (hermanos, misma carpeta padre):
+```bash
+git clone https://github.com/Adr4563/tesis-csi2pc-wifi
+git clone https://github.com/Arritmic/csi2pointcloud      # modelo (arquitectura + perdida)
+```
+Debe quedar así:
+```
+  <carpeta>/
+  ├── tesis-csi2pc-wifi/     ← este repo (scripts + dataset + docs)
+  │   └── mmfi_dataset/      ← datos ya incluidos
+  └── csi2pointcloud/        ← repo del modelo de Maata
+```
+
+**2) Instalar librerías** (se recomienda un entorno virtual; con GPU, ver [requirements.txt](requirements.txt)):
+```bash
+cd tesis-csi2pc-wifi
+pip install -r requirements.txt
+```
+
+**3) Entrenar con un solo paso:**
+- **Windows:** doble clic en `entrenar_universidad.bat`
+- **Linux/macOS:** `bash entrenar_universidad.sh`
+
+Eso entrena (60 épocas) → saca métricas ICP del test → genera la visualización. Resultados en
+`pc/resultados/`. Detalle en [`ENTRENAMIENTO.md`](ENTRENAMIENTO.md).
+
+> Si clonas el modelo en otra ruta, indícala con la variable `CSI2PC_REPO` antes de entrenar.
+
+---
+
 ## 1. Idea general del pipeline
 
 ```
