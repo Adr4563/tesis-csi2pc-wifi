@@ -41,7 +41,7 @@ pip install -r requirements.txt
 - **Windows:** doble clic en `entrenar_universidad.bat`
 - **Linux/macOS:** `bash entrenar_universidad.sh`
 
-Eso entrena (60 épocas) → saca métricas ICP del test → genera la visualización. Resultados en
+Eso entrena (40 épocas, igual que Määttä) → saca métricas ICP del test → genera la visualización. Resultados en
 `pc/resultados/`. Detalle en [`ENTRENAMIENTO.md`](ENTRENAMIENTO.md).
 
 > El modelo y el dataset se toman por defecto de dentro del repo. Para usar otros, define las

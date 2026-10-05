@@ -17,8 +17,8 @@ echo " DATOS       : $CSI2PC_DATA"
 echo " RESULTADOS  : $CSI2PC_OUT"
 echo "============================================================"
 
-echo; echo "[1/3] Entrenando (60 epocas, split 70/15/15 por accion)..."
-python "$HERE/pc/entrenar_v2.py" 60
+echo; echo "[1/3] Entrenando (40 epocas, split 70/15/15 por accion)..."
+python "$HERE/pc/entrenar_v2.py" 40
 
 echo; echo "[2/3] Metricas ICP sobre el TEST..."
 python "$HERE/pc/test.py"

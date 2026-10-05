@@ -17,8 +17,8 @@ echo  RESULTADOS  : %CSI2PC_OUT%
 echo ============================================================
 
 echo.
-echo [1/3] Entrenando (60 epocas, split 70/15/15 por accion)...
-python "%~dp0pc\entrenar_v2.py" 60
+echo [1/3] Entrenando (40 epocas, split 70/15/15 por accion)...
+python "%~dp0pc\entrenar_v2.py" 40
 if errorlevel 1 goto :error
 
 echo.

@@ -30,7 +30,7 @@ sys.path.append(REPO)
 from src.csi2pointcloud.csi2pointcloud_arch01 import CSI2PointCloudModel
 from src.loss.mmslab_loss import CSI2PointCloudLoss
 
-EPOCHS = int(sys.argv[1]) if len(sys.argv) > 1 else 60
+EPOCHS = int(sys.argv[1]) if len(sys.argv) > 1 else 40   # alineado a Maata (checkpoint_epoch_41)
 BATCH  = 8
 SPLIT  = (0.70, 0.15, 0.15)   # train / val / test
 torch.manual_seed(0); np.random.seed(0)

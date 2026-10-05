@@ -41,7 +41,7 @@ define estas variables si usas otras ubicaciones:
 
 ### Windows
 Doble clic en **`entrenar_universidad.bat`** (o ejecútalo en una terminal).
-Hace todo de corrido: entrena (60 épocas) → saca métricas de test → genera la visualización.
+Hace todo de corrido: entrena (40 épocas, igual que Määttä) → saca métricas de test → genera la visualización.
 
 ### Linux / macOS
 ```bash
