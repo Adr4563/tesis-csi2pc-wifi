@@ -28,10 +28,14 @@ del cuerpo** (1200 puntos). Se entrena con la pérdida **Chamfer + regularizaci�
    ```bash
    pip install -r requirements.txt
    ```
-4. **Indicar las rutas** mediante variables de entorno (ajustar a la PC de la universidad):
-   - `CSI2PC_REPO` → carpeta del repo `csi2pointcloud` clonado.
-   - `CSI2PC_DATA` → carpeta `mmfi_dataset` con los datos.
-   - `CSI2PC_OUT`  → carpeta donde guardar resultados (opcional; por defecto `pc/resultados`).
+4. **Indicar las rutas** mediante variables de entorno (opcional; ya traen valores por defecto):
+   - `CSI2PC_REPO` → carpeta del repo `csi2pointcloud` clonado (por defecto: al lado de este repo).
+   - `CSI2PC_DATA` → **el dataset YA viene incluido** en este repo (`mmfi_dataset/`, 6 clases, ~62 MB);
+     solo cámbialo si usas otros datos.
+   - `CSI2PC_OUT`  → carpeta donde guardar resultados (por defecto `pc/resultados`).
+
+> **El dataset de las 6 clases ya está en el repo** (`mmfi_dataset/E01/S01/A01…A06`), así que al clonar
+> ya tienes los datos para entrenar. Solo falta clonar el repo del modelo (paso 2) e instalar librerías.
 
 ---
 

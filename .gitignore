@@ -1,13 +1,15 @@
-# Datos y resultados (no se versionan: son pesados y se regeneran)
-mmfi_dataset/
+# El dataset MM-Fi (6 clases, ~62 MB) SI se versiona: se necesita para entrenar.
+# mmfi_dataset/   -> incluido a proposito
+
+# Capturas crudas, modelos y resultados (pesados / se regeneran) NO se versionan
 capturas_sync/
 capturas/
 resultados/
 *.pth
-*.bin
-*.mat
 *.ply
 *.gif
+# Nota: los *.bin y *.mat de mmfi_dataset/ SI se incluyen (son el dataset).
+# Si hubiera .bin/.mat fuera del dataset que no quieras versionar, exclúyelos por ruta.
 
 # Repos de terceros (se clonan aparte; ver README)
 csi2pointcloud/

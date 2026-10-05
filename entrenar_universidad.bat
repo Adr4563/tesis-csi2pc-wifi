@@ -7,7 +7,7 @@ setlocal
 
 REM --- Ajustar estas rutas en la PC de la universidad si hace falta ---
 if "%CSI2PC_REPO%"=="" set CSI2PC_REPO=%~dp0..\csi2pointcloud
-if "%CSI2PC_DATA%"=="" set CSI2PC_DATA=%~dp0..\mmfi_dataset
+if "%CSI2PC_DATA%"=="" set CSI2PC_DATA=%~dp0mmfi_dataset
 if "%CSI2PC_OUT%"==""  set CSI2PC_OUT=%~dp0pc\resultados
 
 echo ============================================================

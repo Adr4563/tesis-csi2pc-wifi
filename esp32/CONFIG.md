@@ -4,6 +4,12 @@ Los 3 sniffers usan el firmware del proyecto **esp-csi** de Espressif, ejemplo
 `examples/get-started/csi_recv`, grabado en modo **sniffer (promiscuo)** sobre **ESP32-S3**.
 Todos los valores de abajo son los **reales usados en este trabajo**.
 
+> **El código del firmware modificado está en [`csi_recv/`](csi_recv/)** (junto a este archivo):
+> `csi_recv/main/app_main.c` es la fuente con los cambios de este trabajo (canal 6, filtro por MAC
+> del router, HT40/HT-LTF, `rx_seq`), y `csi_recv/sdkconfig(.defaults)` tiene la configuración de
+> compilación (baud 4 Mbaud, target esp32s3). Son los archivos del proyecto `esp-csi` que se
+> modificaron; el resto del repo `esp-csi` (componentes de Espressif) se clona aparte.
+
 ---
 
 ## 1. Parámetros de radio (deben coincidir con el router)
@@ -62,13 +68,25 @@ fase = `angle(I+jQ)`. En HT40 las 114 subportadoras útiles se extraen concatena
 
 ## 4. Grabar el firmware (una sola vez por placa)
 
-Con ESP-IDF instalado:
+Con ESP-IDF instalado. Hay dos formas:
 
+**A) Usando el firmware ya modificado de este repo:**
+```bash
+git clone https://github.com/espressif/esp-csi     # componentes de Espressif
+# copiar los archivos modificados de este repo sobre el ejemplo:
+cp -r esp32/csi_recv/* esp-csi/examples/get-started/csi_recv/
+cd esp-csi/examples/get-started/csi_recv
+idf.py set-target esp32s3
+idf.py -p <PUERTO> flash    # <PUERTO> = COMx (Windows) o /dev/ttyACMx (Linux)
+```
+
+**B) Desde el ejemplo original**, aplicando a mano los cambios de la §1–§3 en `main/app_main.c`
+y el baud en `menuconfig`:
 ```bash
 cd esp-csi/examples/get-started/csi_recv
 idf.py set-target esp32s3
-idf.py menuconfig          # (opcional) verificar baud 4000000 y canal
-idf.py -p <PUERTO> flash   # <PUERTO> = COMx (Windows) o /dev/ttyACMx (Linux)
+idf.py menuconfig          # verificar baud 4000000 y canal 6
+idf.py -p <PUERTO> flash
 ```
 
 Tras grabarse, cada ESP32 arranca solo al recibir alimentación y empieza a sniffear en el canal 6.
