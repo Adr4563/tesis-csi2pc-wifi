@@ -7,6 +7,7 @@ scipy>=1.9            # scipy.io para leer los .mat del CSI
 open3d>=0.17          # nubes de puntos, registro ICP, auto-nivelado del piso, visores 3D
 matplotlib>=3.6       # curvas de perdida y visualizacion GT vs predicho
 Pillow>=9.0           # GIF animado de resultados
+jupyterlab>=4.0       # notebook pc/entrenar_visualizar.ipynb (entrenar + metricas + visualizar)
 
 # ---- Solo en la Raspberry Pi (lectura de los ESP32) ----
 pyserial>=3.5         # lectura UART/USB de los 3 ESP32

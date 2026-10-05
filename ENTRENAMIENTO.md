@@ -48,6 +48,14 @@ Hace todo de corrido: entrena (60 épocas) → saca métricas de test → genera
 bash entrenar_universidad.sh
 ```
 
+### Opción Jupyter (entrenar + métricas + visualizar paso a paso)
+Si prefieres un **notebook** (útil para ver el proceso y las nubes de puntos de forma interactiva):
+```bash
+jupyter lab            # y abrir  pc/entrenar_visualizar.ipynb  -> Run All
+```
+El notebook hace lo mismo que los scripts (split 70/15/15, entrenamiento, métricas ICP y
+visualización GT vs predicho con colores de Määttä), celda por celda.
+
 Ambos scripts ejecutan, en orden:
 ```bash
 python pc/entrenar_v2.py 60     # entrena (split 70/15/15 por acción) y guarda el mejor modelo por val
