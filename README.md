@@ -13,25 +13,27 @@ transformer que aprende a **reconstruir la nube de puntos del cuerpo humano usan
 
 ## 0. Inicio rápido — entrenar en otra PC (p. ej. la universidad)
 
-> El **dataset ya viene en este repo** (`mmfi_dataset/`, 6 clases). Solo hace falta el repo del
-> **modelo de Määttä** (se clona al lado) e instalar las librerías.
+> Este repo es **autónomo**: ya incluye el **dataset** (`mmfi_dataset/`, 6 clases), el **modelo de
+> Määttä** (`csi2pointcloud/`, MIT) y las **capturas crudas** de respaldo. **No hace falta descargar
+> nada más** (ni siquiera internet, salvo para instalar las librerías de Python).
 
-**1) Clonar los dos repos, uno al lado del otro** (hermanos, misma carpeta padre):
+**1) Clonar (o copiar) solo este repo:**
 ```bash
 git clone https://github.com/Adr4563/tesis-csi2pc-wifi
-git clone https://github.com/Arritmic/csi2pointcloud      # modelo (arquitectura + perdida)
+cd tesis-csi2pc-wifi
 ```
-Debe quedar así:
+Estructura (todo ya viene dentro):
 ```
-  <carpeta>/
-  ├── tesis-csi2pc-wifi/     ← este repo (scripts + dataset + docs)
-  │   └── mmfi_dataset/      ← datos ya incluidos
-  └── csi2pointcloud/        ← repo del modelo de Maata
+  tesis-csi2pc-wifi/
+  ├── mmfi_dataset/     ← datos (CSI + Kinect, 6 clases)
+  ├── csi2pointcloud/   ← modelo de Maata (incluido, MIT)
+  ├── capturas_crudas/  ← respaldo de las capturas crudas
+  ├── pc/  pi/  kinect/  esp32/  docs/
+  └── entrenar_universidad.bat / .sh
 ```
 
 **2) Instalar librerías** (se recomienda un entorno virtual; con GPU, ver [requirements.txt](requirements.txt)):
 ```bash
-cd tesis-csi2pc-wifi
 pip install -r requirements.txt
 ```
 
@@ -42,7 +44,8 @@ pip install -r requirements.txt
 Eso entrena (60 épocas) → saca métricas ICP del test → genera la visualización. Resultados en
 `pc/resultados/`. Detalle en [`ENTRENAMIENTO.md`](ENTRENAMIENTO.md).
 
-> Si clonas el modelo en otra ruta, indícala con la variable `CSI2PC_REPO` antes de entrenar.
+> El modelo y el dataset se toman por defecto de dentro del repo. Para usar otros, define las
+> variables `CSI2PC_REPO` / `CSI2PC_DATA` antes de entrenar.
 
 ---
 
@@ -334,6 +337,7 @@ entrenar_universidad.bat / .sh   entrenamiento en un paso (Windows / Linux)
 - Proyecto **esp-csi** (Espressif): captura de CSI con ESP32.
 ```
 > El modelo (arquitectura `CSI2PointCloudModel` y la pérdida Chamfer) proviene del repositorio oficial
-> de Määttä (`csi2pointcloud`), que se clona aparte; este repo contiene el pipeline de captura,
-> formateo, entrenamiento y evaluación con **hardware y datos propios**.
+> de Määttä (`csi2pointcloud`), **incluido en este repo bajo licencia MIT** (ver
+> `csi2pointcloud/LICENSE`, © 2024 Constantino Álvarez). Este repositorio aporta el pipeline de
+> captura, formateo, entrenamiento y evaluación con **hardware y datos propios**.
 ```

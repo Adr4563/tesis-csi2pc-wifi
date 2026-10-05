@@ -1,19 +1,19 @@
-# El dataset MM-Fi (6 clases, ~62 MB) SI se versiona: se necesita para entrenar.
-# mmfi_dataset/   -> incluido a proposito
+# Este repo es AUTONOMO: incluye dataset, modelo, firmware y capturas crudas.
 
-# Capturas crudas, modelos y resultados (pesados / se regeneran) NO se versionan
-capturas_sync/
+# Incluido a proposito (NO ignorar):
+#   mmfi_dataset/     -> dataset de entrenamiento (CSI + Kinect, 6 clases)
+#   csi2pointcloud/   -> modelo de Maata vendorizado (MIT, ver su LICENSE)
+#   capturas_crudas/  -> capturas crudas de respaldo (rx*.csv + nubes .bin)
+#   esp32/            -> firmware y configs de flasheo
+#   pc/pc_pi_offset.txt -> offset de reloj PC<->Pi
+
+# NO versionar (se regeneran / pesados / propios de la maquina):
+capturas_sync/          # carpeta de trabajo original (ya copiada a capturas_crudas/)
 capturas/
 resultados/
-*.pth
-*.ply
-*.gif
-# Nota: los *.bin y *.mat de mmfi_dataset/ SI se incluyen (son el dataset).
-# Si hubiera .bin/.mat fuera del dataset que no quieras versionar, exclúyelos por ruta.
-
-# Repos de terceros (se clonan aparte; ver README)
-csi2pointcloud/
-esp-csi/
+*.pth                   # modelos entrenados (se regeneran al entrenar)
+*.ply                   # previews de nube (regenerables)
+*.gif                   # animaciones de resultados (regenerables)
 
 # Python
 __pycache__/
@@ -26,6 +26,7 @@ env/
 # Logs / temporales
 *.log
 entrena_log.txt
+jupyter_log.txt
 *.tmp
 
 # Sistema

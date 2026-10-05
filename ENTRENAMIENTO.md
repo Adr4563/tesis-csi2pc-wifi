@@ -20,22 +20,20 @@ del cuerpo** (1200 puntos). Se entrena con la pérdida **Chamfer + regularizaci�
 ## Requisitos previos (una sola vez)
 
 1. **Python 3.10+** instalado.
-2. **Clonar el repositorio del modelo** de Määttä (contiene la arquitectura y la pérdida) junto a este:
-   ```bash
-   git clone https://github.com/Arritmic/csi2pointcloud
-   ```
-3. **Instalar librerías:**
+2. **Instalar librerías:**
    ```bash
    pip install -r requirements.txt
    ```
-4. **Indicar las rutas** mediante variables de entorno (opcional; ya traen valores por defecto):
-   - `CSI2PC_REPO` → carpeta del repo `csi2pointcloud` clonado (por defecto: al lado de este repo).
-   - `CSI2PC_DATA` → **el dataset YA viene incluido** en este repo (`mmfi_dataset/`, 6 clases, ~62 MB);
-     solo cámbialo si usas otros datos.
-   - `CSI2PC_OUT`  → carpeta donde guardar resultados (por defecto `pc/resultados`).
 
-> **El dataset de las 6 clases ya está en el repo** (`mmfi_dataset/E01/S01/A01…A06`), así que al clonar
-> ya tienes los datos para entrenar. Solo falta clonar el repo del modelo (paso 2) e instalar librerías.
+> **Todo lo demás ya viene en el repo:** el **dataset** (`mmfi_dataset/`, 6 clases), el **modelo de
+> Määttä** (`csi2pointcloud/`, MIT) y las **capturas crudas** de respaldo. No hace falta clonar ni
+> descargar nada más.
+
+**Rutas (opcional):** los scripts toman por defecto el modelo y el dataset de dentro del repo. Solo
+define estas variables si usas otras ubicaciones:
+- `CSI2PC_REPO` → carpeta del modelo (por defecto: `csi2pointcloud/` dentro del repo).
+- `CSI2PC_DATA` → dataset (por defecto: `mmfi_dataset/` dentro del repo).
+- `CSI2PC_OUT`  → resultados (por defecto `pc/resultados/`).
 
 ---
 

@@ -7,7 +7,7 @@ set -e
 HERE="$(cd "$(dirname "$0")" && pwd)"
 
 # --- Ajustar estas rutas en la PC de la universidad si hace falta ---
-export CSI2PC_REPO="${CSI2PC_REPO:-$HERE/../csi2pointcloud}"
+export CSI2PC_REPO="${CSI2PC_REPO:-$HERE/csi2pointcloud}"
 export CSI2PC_DATA="${CSI2PC_DATA:-$HERE/mmfi_dataset}"
 export CSI2PC_OUT="${CSI2PC_OUT:-$HERE/pc/resultados}"
 

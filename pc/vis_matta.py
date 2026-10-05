@@ -13,9 +13,10 @@ import numpy as np, scipy.io as scio, torch
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-REPO = os.environ.get("CSI2PC_REPO", r"C:\Users\user\Desktop\Carpeta_Trabajo\csi2pointcloud")
-ROOT = os.environ.get("CSI2PC_DATA", r"C:\Users\user\Desktop\Carpeta_Trabajo\capturas_sync\mmfi_dataset")
-OUT  = os.environ.get("CSI2PC_OUT",  os.path.join(os.path.dirname(os.path.abspath(__file__)), "resultados"))
+_HERE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.environ.get("CSI2PC_REPO", os.path.join(_HERE, "..", "csi2pointcloud"))
+ROOT = os.environ.get("CSI2PC_DATA", os.path.join(_HERE, "..", "mmfi_dataset"))
+OUT  = os.environ.get("CSI2PC_OUT",  os.path.join(_HERE, "resultados"))
 CKPT = os.path.join(OUT, "modelo", "csi2pc_v2.pth")
 sys.path.append(REPO)
 from src.csi2pointcloud.csi2pointcloud_arch01 import CSI2PointCloudModel

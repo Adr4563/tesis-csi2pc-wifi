@@ -20,10 +20,11 @@ from torch.utils.data import Dataset, DataLoader, Subset
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-# ---- rutas (ajustar REPO/ROOT si cambia la maquina; ver README) ----
-REPO = os.environ.get("CSI2PC_REPO", r"C:\Users\user\Desktop\Carpeta_Trabajo\csi2pointcloud")
-ROOT = os.environ.get("CSI2PC_DATA", r"C:\Users\user\Desktop\Carpeta_Trabajo\capturas_sync\mmfi_dataset")
-OUT  = os.environ.get("CSI2PC_OUT",  os.path.join(os.path.dirname(os.path.abspath(__file__)), "resultados"))
+# ---- rutas: por defecto usan el modelo y el dataset INCLUIDOS en este repo ----
+_HERE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.environ.get("CSI2PC_REPO", os.path.join(_HERE, "..", "csi2pointcloud"))
+ROOT = os.environ.get("CSI2PC_DATA", os.path.join(_HERE, "..", "mmfi_dataset"))
+OUT  = os.environ.get("CSI2PC_OUT",  os.path.join(_HERE, "resultados"))
 os.makedirs(OUT, exist_ok=True)
 sys.path.append(REPO)
 from src.csi2pointcloud.csi2pointcloud_arch01 import CSI2PointCloudModel
