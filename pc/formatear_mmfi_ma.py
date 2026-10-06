@@ -24,6 +24,8 @@ os.makedirs(os.path.join(DST, "lidar"), exist_ok=True)
 
 T_STEPS = 10
 N_SUB   = 114
+RAW_LEN = 384  # solo paquetes HT40 (192 complejos); len=256 es HT20 -> se descarta
+MAX_CSI_CLOUD_DT = 0.15  # s: distancia maxima nube <-> centro de la ventana CSI
 DATA_RE = re.compile(r'\[([-\d,]+)\]')
 
 def read_offset():
@@ -35,14 +37,17 @@ def read_offset():
 OFF = read_offset()
 
 def ht40_complex(vals):
-    """Devuelve el CSI COMPLEJO de las 114 subportadoras HT40."""
+    """Devuelve el CSI COMPLEJO de las 114 subportadoras HT40.
+
+    De los 192 complejos del paquete, el bloque HT-LTF son 66..122 y 134..190
+    (57+57); LLTF (6..58) y los huecos de guarda/DC quedan fuera.
+    """
+    if len(vals) != RAW_LEN:
+        return None                          # HT20 (len=256) u otro formato
     a = np.array(vals, dtype=np.float64)
     Q = a[0::2]; I = a[1::2]
     comp = I + 1j * Q
-    if comp.shape[0] >= 184:
-        comp = np.concatenate([comp[66:123], comp[127:184]])
-    else:
-        comp = comp[-N_SUB:]
+    comp = np.concatenate([comp[66:123], comp[134:191]])
     if comp.shape[0] != N_SUB:
         return None
     return comp
@@ -58,6 +63,7 @@ def moving_average_complex(X, win):
 
 def load_rx(path):
     ts, comps = [], []
+    n_tot = n_drop = 0
     with open(path) as f:
         for line in f:
             c = line.split(",", 1)
@@ -66,9 +72,13 @@ def load_rx(path):
             m = DATA_RE.search(c[1])
             if not m: continue
             vals = [int(x) for x in m.group(1).split(",") if x != ""]
+            n_tot += 1
             comp = ht40_complex(vals)
-            if comp is None: continue
+            if comp is None:
+                n_drop += 1; continue
             ts.append(float(c[0]) - OFF); comps.append(comp)
+    print("  %s: %d CSI, %d HT40 (len=384), %d descartados (no HT40)"
+          % (os.path.basename(path), n_tot, n_tot - n_drop, n_drop))
     if not ts:
         return np.array([]), None, None
     o = np.argsort(ts)
@@ -99,7 +109,13 @@ def window10(ts_arr, t):
     if hi > len(ts_arr): hi = len(ts_arr); lo = hi - T_STEPS
     return np.arange(lo, hi)
 
+def window_dt(ts_arr, w, t):
+    """Distancia (s) de t al centro de la ventana (el borde dista ~0.05 s por
+    construccion a ~95 Hz, asi que medir el borde descartaria casi todo)."""
+    return abs(float(np.median(ts_arr[w])) - t)
+
 n_ok = 0
+n_lejos = 0
 for idx in sorted(kts):
     tpc = kts[idx]
     binsrc = os.path.join(SES, "kinect", "frame%03d.bin" % idx)
@@ -110,6 +126,8 @@ for idx in sorted(kts):
         ts_arr, amps, phas = rx[r]
         w = window10(ts_arr, tpc)
         if len(w) < T_STEPS: ok = False; break
+        if window_dt(ts_arr, w, tpc) > MAX_CSI_CLOUD_DT:
+            ok = False; n_lejos += 1; break    # hueco en el CSI
         amp3[r] = amps[w].T; pha3[r] = phas[w].T
     if not ok: continue
     n_ok += 1
@@ -118,5 +136,6 @@ for idx in sorted(kts):
     shutil.copy(binsrc, os.path.join(DST, "lidar", "frame%03d.bin" % n_ok))
 
 print("Frames MM-Fi (con media movil) generados: %d" % n_ok)
+print("Frames descartados por desfase nube<->CSI (> %.3f s): %d" % (MAX_CSI_CLOUD_DT, n_lejos))
 print("Salida:", DST)
 print(">> data_root:", OUTROOT)

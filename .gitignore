@@ -1,10 +1,10 @@
 # Este repo es AUTONOMO: incluye dataset, modelo, firmware y capturas crudas.
 
 # Incluido a proposito (NO ignorar):
+#   tesis/            -> los 3 notebooks + modelo de Maata (MIT, ver tesis/modelo/LICENSE)
 #   mmfi_dataset/     -> dataset de entrenamiento (CSI + Kinect, 6 clases)
-#   csi2pointcloud/   -> modelo de Maata vendorizado (MIT, ver su LICENSE)
 #   capturas_crudas/  -> capturas crudas de respaldo (rx*.csv + nubes .bin)
-#   esp32/            -> firmware y configs de flasheo
+#   esp32/            -> firmware de captura CSI (csi_recv/) y documentacion
 #   pc/pc_pi_offset.txt -> offset de reloj PC<->Pi
 
 # NO versionar (se regeneran / pesados / propios de la maquina):
@@ -28,6 +28,9 @@ env/
 entrena_log.txt
 jupyter_log.txt
 *.tmp
+
+# Editor
+.vscode/
 
 # Sistema
 .DS_Store

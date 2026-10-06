@@ -1,3 +1,8 @@
+> **NOTA (2026-10-06):** bitácora histórica. El firmware que se usa hoy es
+> `esp32/csi_recv/` (csi_recv_router, 114 subportadoras HT40, router como TX).
+> Los binarios `passive.bin` / `active-sta.bin` que se mencionan abajo quedaron
+> **obsoletos** y se quitaron del repo. Ver [`../COMO_FLASHEAR.md`](../COMO_FLASHEAR.md).
+
 # Estado del flasheo de placas ESP32-S3 — 2026-09-26
 
 ## Asignación de roles (ACTUALIZADA)

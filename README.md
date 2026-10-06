@@ -14,7 +14,7 @@ transformer que aprende a **reconstruir la nube de puntos del cuerpo humano usan
 ## 0. Inicio rápido — entrenar en otra PC (p. ej. la universidad)
 
 > Este repo es **autónomo**: ya incluye el **dataset** (`mmfi_dataset/`, 6 clases), el **modelo de
-> Määttä** (`csi2pointcloud/`, MIT) y las **capturas crudas** de respaldo. **No hace falta descargar
+> Määttä** (`tesis/modelo/`, MIT) y las **capturas crudas** de respaldo. **No hace falta descargar
 > nada más** (ni siquiera internet, salvo para instalar las librerías de Python).
 
 **1) Clonar (o copiar) solo este repo:**
@@ -25,11 +25,13 @@ cd tesis-csi2pc-wifi
 Estructura (todo ya viene dentro):
 ```
   tesis-csi2pc-wifi/
-  ├── mmfi_dataset/     ← datos (CSI + Kinect, 6 clases)
-  ├── csi2pointcloud/   ← modelo de Maata (incluido, MIT)
-  ├── capturas_crudas/  ← respaldo de las capturas crudas
-  ├── pc/  pi/  kinect/  esp32/  docs/
-  └── entrenar_universidad.bat / .sh
+  ├── tesis/            ← los 3 notebooks (eda / entrenar / test) + modelo/ (MIT)
+  ├── mmfi_dataset/     ← datos listos para entrenar (CSI + Kinect, 6 clases)
+  ├── capturas_crudas/  ← capturas originales (de aqui sale mmfi_dataset)
+  ├── pc/               ← formateo, pipeline y visualizacion
+  ├── esp32/            ← firmware de los 3 sniffers CSI
+  ├── kinect/           ← captura de nubes de puntos
+  └── pi/  docs/
 ```
 
 **2) Instalar librerías** (se recomienda un entorno virtual; con GPU, ver [requirements.txt](requirements.txt)):
@@ -38,11 +40,15 @@ pip install -r requirements.txt
 ```
 
 **3) Entrenar con un solo paso:**
-- **Windows:** doble clic en `entrenar_universidad.bat`
-- **Linux/macOS:** `bash entrenar_universidad.sh`
+```bash
+python pc/correr_todo.py
+```
+Eso corre los 3 notebooks en orden (EDA → entrenar → test), cada uno con kernel
+limpio, y **sobrescribe** `pc/resultados/`. Para una sola etapa:
+`python pc/correr_todo.py --solo entrenar`.
 
-Eso entrena (40 épocas, igual que Määttä) → saca métricas ICP del test → genera la visualización. Resultados en
-`pc/resultados/`. Detalle en [`ENTRENAMIENTO.md`](ENTRENAMIENTO.md).
+También puedes abrir los notebooks a mano desde `tesis/` (Restart Kernel and Run All).
+GIF por acción: `python pc/gifs_por_accion.py`. Detalle en [`ENTRENAMIENTO.md`](ENTRENAMIENTO.md).
 
 > El modelo y el dataset se toman por defecto de dentro del repo. Para usar otros, define las
 > variables `CSI2PC_REPO` / `CSI2PC_DATA` antes de entrenar.
@@ -287,12 +293,11 @@ python capturar_acciones.py --dur 40
 
 ### 8.4 Entrenar y evaluar
 ```bash
-cd pc
-python entrenar_v2.py 60      # split 70/15/15 cronológico por acción
-python test.py                # métricas ICP sobre el TEST reservado
-python vis_matta.py A03 10    # visualización GT vs predicho (colores de Määttä)
-python video_pred.py          # GIF animado de la generación de puntos
+python pc/correr_todo.py            # EDA -> entrenar -> test (kernel limpio cada uno)
+python pc/correr_todo.py --solo test
+python pc/gifs_por_accion.py        # un GIF por accion: GT vs predicho
 ```
+O abre los notebooks de `tesis/` a mano (Restart Kernel and Run All).
 
 > En la universidad (PC con mejores componentes) el entrenamiento se lanza con un solo paso:
 > ver [`ENTRENAMIENTO.md`](ENTRENAMIENTO.md).
@@ -302,7 +307,7 @@ python video_pred.py          # GIF animado de la generación de puntos
 ## 9. Evaluación
 
 Split **70/15/15 cronológico por acción** (sin fuga temporal: frames vecinos casi idénticos nunca se
-reparten entre train y test). Métricas sobre el **test reservado** (`pc/test.py`):
+reparten entre train y test). Métricas sobre el **test reservado** (`tesis/test_tesis.ipynb`):
 - **ICP fitness** — fracción de puntos con correspondencia dentro de un umbral.
 - **ICP RMSE** — error de esas correspondencias (metros).
 - **Chamfer** — distancia bidireccional media (referencia de reconstrucción/cobertura).
@@ -317,13 +322,14 @@ Las nubes GT (Kinect) y predicha (IA) se visualizan con los **colores de Määtt
 ```
 pc/      scripts de la PC (captura, emparejado, formato, entrenamiento, test, visualización)
 pi/      scripts de la Raspberry Pi (lectura de los ESP32 y generación de tráfico)
-kinect/  captura de nubes con Azure Kinect + visores 3D
+kinect/  captura de nubes con Azure Kinect
 esp32/   configuración del firmware de los sniffers (esp32/CONFIG.md)
 docs/    documentación técnica (docs/RED_Y_TRAFICO.md: red, tráfico, PPDUs, ICMP, límites)
+tesis/   los 3 notebooks (eda_senal, entrenar_tesis, test_tesis) + modelo/ (MIT)
 README.md          este archivo
-ENTRENAMIENTO.md   cómo entrenar el modelo (un paso) en la universidad
+ENTRENAMIENTO.md   cómo entrenar el modelo
 requirements.txt   librerías
-entrenar_universidad.bat / .sh   entrenamiento en un paso (Windows / Linux)
+pc/correr_todo.py  pipeline completo en un paso (EDA -> entrenar -> test)
 ```
 
 ---
@@ -337,7 +343,7 @@ entrenar_universidad.bat / .sh   entrenamiento en un paso (Windows / Linux)
 - Proyecto **esp-csi** (Espressif): captura de CSI con ESP32.
 ```
 > El modelo (arquitectura `CSI2PointCloudModel` y la pérdida Chamfer) proviene del repositorio oficial
-> de Määttä (`csi2pointcloud`), **incluido en este repo bajo licencia MIT** (ver
-> `csi2pointcloud/LICENSE`, © 2024 Constantino Álvarez). Este repositorio aporta el pipeline de
+> de Määttä (`tesis/modelo/`), **incluido en este repo bajo licencia MIT** (ver
+> `tesis/modelo/LICENSE`, © 2024 Constantino Álvarez). Este repositorio aporta el pipeline de
 > captura, formateo, entrenamiento y evaluación con **hardware y datos propios**.
 ```

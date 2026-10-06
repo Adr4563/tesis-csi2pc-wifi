@@ -34,6 +34,8 @@ os.makedirs(os.path.join(DST, "lidar"), exist_ok=True)
 
 T_STEPS = 10   # muestras temporales por frame (MM-Fi usa 10)
 N_SUB   = 114  # subportadoras HT40
+RAW_LEN = 384  # solo paquetes HT40 (192 complejos); len=256 es HT20 -> se descarta
+MAX_CSI_CLOUD_DT = 0.15  # s: distancia maxima nube <-> centro de la ventana CSI
 DATA_RE = re.compile(r'\[([-\d,]+)\]')
 
 # --- offset PC<->Pi ---
@@ -46,17 +48,23 @@ def read_offset():
 OFF = read_offset()
 
 def ht40_amp_phase(vals):
-    """De un array de 612 (o 380) valores I/Q -> amplitud y fase de 114 subp HT40."""
+    """De los 384 valores I/Q de un paquete HT40 -> amplitud y fase de 114 subp.
+
+    Los 384 valores son 192 subportadoras complejas que contienen DOS bloques
+    (medido sobre capturas_crudas, indices de subportadora compleja):
+        LLTF  :  6..31  y  33..58    (26+26 =  52 subp)
+        HT-LTF: 66..122 y 134..190   (57+57 = 114 subp)  <-- el que usa MM-Fi
+    El resto son huecos de guarda/DC y vienen siempre en cero.
+    """
+    if len(vals) != RAW_LEN:
+        return None, None                    # HT20 (len=256) u otro formato
     a = np.array(vals, dtype=np.float64)
     Q = a[0::2]; I = a[1::2]                 # par=Q(imag), impar=I(real)
     amp = np.sqrt(I**2 + Q**2)
     pha = np.arctan2(Q, I)
-    # bloque HT-LTF = 114 subportadoras (saltando hueco DC)
-    if amp.shape[0] >= 184:
-        amp = np.concatenate([amp[66:123], amp[127:184]])
-        pha = np.concatenate([pha[66:123], pha[127:184]])
-    else:  # len=380 (190 valores): HT-LTF empieza antes; fallback: ultimos 114
-        amp = amp[-N_SUB:]; pha = pha[-N_SUB:]
+    # bloque HT-LTF = 114 subportadoras (el segundo medio arranca en 134, no 127)
+    amp = np.concatenate([amp[66:123], amp[134:191]])
+    pha = np.concatenate([pha[66:123], pha[134:191]])
     if amp.shape[0] != N_SUB:
         return None, None
     return amp, pha
@@ -64,6 +72,7 @@ def ht40_amp_phase(vals):
 def load_rx(path):
     """Devuelve (ts_pc[], amp[Nx114], pha[Nx114]) de un rxN.csv."""
     ts, amps, phas = [], [], []
+    n_tot = n_drop = 0
     with open(path) as f:
         for line in f:
             c = line.split(",", 1)
@@ -73,11 +82,15 @@ def load_rx(path):
             if not m:
                 continue
             vals = [int(x) for x in m.group(1).split(",") if x != ""]
+            n_tot += 1
             amp, pha = ht40_amp_phase(vals)
             if amp is None:
+                n_drop += 1
                 continue
             ts.append(float(c[0]) - OFF)     # Pi -> PC
             amps.append(amp); phas.append(pha)
+    print("  %s: %d CSI, %d HT40 (len=384), %d descartados (no HT40)"
+          % (os.path.basename(path), n_tot, n_tot - n_drop, n_drop))
     if not ts:
         return np.array([]), None, None
     o = np.argsort(ts)
@@ -109,7 +122,18 @@ def window10(ts_arr, t):
         hi = len(ts_arr); lo = hi - T_STEPS
     return np.arange(lo, hi)
 
+def window_dt(ts_arr, w, t):
+    """Distancia (s) de t al centro de la ventana w.
+
+    A ~95 Hz las 10 muestras abarcan ~0.105 s, asi que el borde de una ventana
+    bien centrada ya dista ~0.053 s de t; medir el borde haria que cualquier
+    umbral razonable descartase casi todo. Lo que delata un hueco real en el
+    CSI es que el centro de la ventana se aleje de la nube.
+    """
+    return abs(float(np.median(ts_arr[w])) - t)
+
 n_ok = 0
+n_lejos = 0
 for idx in sorted(kts):
     tpc = kts[idx]
     binsrc = os.path.join(SES, "kinect", "frame%03d.bin" % idx)
@@ -123,6 +147,8 @@ for idx in sorted(kts):
         w = window10(ts_arr, tpc)
         if len(w) < T_STEPS:
             ok = False; break
+        if window_dt(ts_arr, w, tpc) > MAX_CSI_CLOUD_DT:
+            ok = False; n_lejos += 1; break    # hueco en el CSI: nube sin pareja real
         amp3[r] = amps[w].T    # [114, 10]
         pha3[r] = phas[w].T
     if not ok:
@@ -133,6 +159,7 @@ for idx in sorted(kts):
     shutil.copy(binsrc, os.path.join(DST, "lidar", "frame%03d.bin" % n_ok))
 
 print("Frames MM-Fi generados: %d" % n_ok)
+print("Frames descartados por desfase nube<->CSI (> %.3f s): %d" % (MAX_CSI_CLOUD_DT, n_lejos))
 print("Salida:", DST)
 print("  wifi-csi/frame###.mat  (CSIamp[3,114,10], CSIphase[3,114,10])")
 print("  lidar/frame###.bin     (nube)")
