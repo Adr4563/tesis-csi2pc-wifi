@@ -16,7 +16,7 @@ SESSION = sys.argv[2] if len(sys.argv) > 2 else "sesion_" + datetime.datetime.no
 PI         = "pi@192.168.0.179"
 BASE       = r"C:\Users\user\Desktop\Carpeta_Trabajo\capturas_sync"
 OUT        = os.path.join(BASE, SESSION)
-KINECT_DIR = r"C:\Users\user\Desktop\Carpeta_Trabajo\3d-human-pointcloud-wifi-csi\kinect"
+KINECT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "kinect")
 K4A_BIN    = r"C:\Program Files\Azure Kinect SDK v1.4.1\sdk\windows-desktop\amd64\release\bin"
 K4A_TOOLS  = r"C:\Program Files\Azure Kinect SDK v1.4.1\tools"
 OFFSET_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pc_pi_offset.txt")
@@ -46,12 +46,18 @@ def run_csi():
     result["csi"] = r.stdout[-400:] + r.stderr[-200:]
 
 def run_kinect():
-    r = subprocess.run(
-        ["python", os.path.join(KINECT_DIR, "kinect_capture_pointcloud.py"),
-         "--out-dir", os.path.join(OUT, "kinect"),
-         "--duration", str(DUR), "--fps-target", "10", "--num-points", "1200",
-         "--min-range", "0.4", "--max-range", "2.5", "--save-ply-every", "10"],
-        cwd=KINECT_DIR, env=env, capture_output=True, text=True)
+    # Aislamiento de persona y descarte de calentamiento, controlados por variables de entorno:
+    #   SOLO_PERSONA=1   -> guarda SOLO la persona (habitacion sola -> nube vacia)
+    #   WARMUP=<seg>     -> descarta los primeros <seg> segundos
+    cmd = ["python", os.path.join(KINECT_DIR, "kinect_capture_pointcloud.py"),
+           "--out-dir", os.path.join(OUT, "kinect"),
+           "--duration", str(DUR), "--fps-target", "10", "--num-points", "1200",
+           "--min-range", os.environ.get("MIN_RANGE", "0.5"),
+           "--max-range", os.environ.get("MAX_RANGE", "3.0"),
+           "--warmup", os.environ.get("WARMUP", "0")]
+    if os.environ.get("SOLO_PERSONA", "") in ("1", "true", "True"):
+        cmd.append("--solo-persona")
+    r = subprocess.run(cmd, cwd=KINECT_DIR, env=env, capture_output=True, text=True)
     result["kinect"] = r.stdout[-500:] + r.stderr[-300:]
 
 print(">> Sesion:", SESSION, "| duracion:", DUR, "s | offset PC<->Pi:",

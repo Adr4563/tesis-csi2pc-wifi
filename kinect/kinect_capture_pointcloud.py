@@ -180,6 +180,57 @@ def _remove_statistical_outliers(points, colors, voxel_size=0.02, nb_neighbors=2
     return np.asarray(pcd_clean.points), np.asarray(pcd_clean.colors)
 
 
+def isolate_person(points, colors=None, voxel=0.03):
+    """
+    Deja SOLO los puntos de la persona: quita piso y paredes (planos grandes)
+    y se queda con el cluster compacto y vertical (la persona). Si no hay una
+    persona clara (p.ej. 'habitacion sola'), devuelve un arreglo vacio (0,3)
+    -> el llamador lo trata como nube minima/vacia (baseline sin persona).
+
+    Pensado para el caso en que el target es la persona aislada (como el LiDAR
+    de MM-Fi), no la escena completa.
+    """
+    import open3d as o3d
+
+    if points is None or len(points) < 60:
+        return np.zeros((0, 3))
+
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(points)
+    pcd = pcd.voxel_down_sample(voxel)
+
+    # Quitar SOLO las PAREDES: planos con normal HORIZONTAL (|n_y|<0.35), es decir
+    # superficies verticales. Se CONSERVAN la persona y el PISO (plano horizontal,
+    # normal vertical). Hasta 3 paredes.
+    for _ in range(3):
+        if len(pcd.points) < 300:
+            break
+        try:
+            modelo, inl = pcd.segment_plane(0.03, 3, 80)
+        except Exception:
+            break
+        n = np.array(modelo[:3]); n = n / (np.linalg.norm(n) + 1e-9)
+        if abs(n[1]) < 0.35 and len(inl) > 0.15 * len(pcd.points):   # pared (vertical)
+            pcd = pcd.select_by_index(inl, invert=True)
+        else:
+            break
+
+    if len(pcd.points) < 40:
+        return np.zeros((0, 3))
+
+    # Quitar clusters chicos sueltos (muebles), mantener los grandes = persona + piso.
+    lab = np.array(pcd.cluster_dbscan(0.15, 10))
+    pts = np.asarray(pcd.points)
+    if lab.max() < 0:
+        return pts if len(pts) >= 50 else np.zeros((0, 3))
+
+    counts = np.bincount(lab[lab >= 0])
+    grandes = [i for i, c in enumerate(counts) if c >= 0.15 * counts.max()]
+    keep = np.where(np.isin(lab, grandes))[0]
+    q = pts[keep]
+    return q if len(q) >= 50 else np.zeros((0, 3))
+
+
 def point_stats(points):
     """
     Estadisticas basicas de distancia/posicion de un frame ya generado, para
@@ -322,6 +373,8 @@ def main():
     parser.add_argument("--live", action="store_true", help="Abre una ventana con la nube de puntos en tiempo real (no guarda archivos, ignora el resto de las opciones).")
     parser.add_argument("--min-range", type=float, default=1.5, help="Distancia minima al sensor a conservar, en metros (descarta mas cerca). Por defecto 1.5m (banda alrededor de 2m).")
     parser.add_argument("--max-range", type=float, default=2.5, help="Distancia maxima al sensor a conservar, en metros (descarta mas lejos). Por defecto 2.5m (banda alrededor de 2m).")
+    parser.add_argument("--solo-persona", action="store_true", help="Aisla SOLO la persona (quita piso/paredes). Si no hay persona (habitacion sola) guarda una nube minima/vacia.")
+    parser.add_argument("--warmup", type=float, default=0.0, help="Segundos iniciales a DESCARTAR (no guarda nada) para que se estabilicen WiFi/Kinect/pose.")
     args = parser.parse_args()
 
     if args.live:
@@ -350,8 +403,23 @@ def main():
                     print("  [!] Frame invalido (sin datos de profundidad/color sincronizados), se salta.")
                     continue
 
-                s = point_stats(points)
-                points_fixed = fix_point_count(points, args.num_points)
+                # descarte de calentamiento: no guardar los primeros --warmup segundos
+                if (time.time() - t_start) < args.warmup:
+                    continue
+
+                if args.solo_persona:
+                    persona = isolate_person(points, colors)
+                    if persona.shape[0] >= 50:
+                        points = persona
+                        points_fixed = fix_point_count(points, args.num_points)
+                    else:
+                        # sin persona (p.ej. habitacion sola) -> nube minima en el origen
+                        points = np.zeros((1, 3))
+                        points_fixed = np.zeros((args.num_points, 3))
+                    s = point_stats(points)
+                else:
+                    s = point_stats(points)
+                    points_fixed = fix_point_count(points, args.num_points)
 
                 idx += 1
                 bin_path = os.path.join(args.out_dir, f"frame{idx:03d}.bin")

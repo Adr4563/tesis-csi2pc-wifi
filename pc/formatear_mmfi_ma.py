@@ -71,7 +71,10 @@ def load_rx(path):
                 continue
             m = DATA_RE.search(c[1])
             if not m: continue
-            vals = [int(x) for x in m.group(1).split(",") if x != ""]
+            try:
+                vals = [int(x) for x in m.group(1).split(",") if x != ""]
+            except ValueError:
+                continue   # paquete corrupto (glitch del serial, p.ej. "4-38"): se salta
             n_tot += 1
             comp = ht40_complex(vals)
             if comp is None:
