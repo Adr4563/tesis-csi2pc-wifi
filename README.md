@@ -11,11 +11,38 @@ transformer que aprende a **reconstruir la nube de puntos del cuerpo humano usan
 
 ---
 
+## Estado del proyecto y pendientes (TODO)
+
+**Ya hecho:**
+- Dataset propio en formato MM-Fi: **5 clases persona+piso** (habitación, estática, sentadilla,
+  caminar, torso), ~**4063 pares** (CSI ESP32 2.4 GHz + nubes Kinect), con la persona aislada.
+- Preprocesamiento alineado con Määttä (amplitud min-max + fase cruda + estandarización + media móvil).
+- Extracción HT40 verificada (bloques HT-LTF, orden I/Q imag-real del firmware, hueco DC).
+- Gráficas de análisis: amplitud/fase por receptor, espectro (subportadora×tiempo), efecto del preproc.
+  (`pc/graficas_csi.py`, `pc/espectro_csi.py`, `pc/espectro_preproc.py`, `pc/verificar_ht40.py`).
+
+**PENDIENTE (qué falta hacer):**
+1. **Entrenar el modelo** las **30 épocas** con el split de Määttä (ratio 0.8), arquitectura 256.
+   En CPU son horas (medido ~12 s/batch); hacerlo en la **GPU de la universidad** (minutos).
+   Script listo: `pc/entrenar_sentadilla.py` (solo A03) o los notebooks de `tesis/` (todas las clases).
+2. **Ver resultados:** `pc/ver_sentadilla.py` → **GIF del movimiento** (GT vs predicho) + **Chamfer**
+   en test. Revisar cuánto baja el Chamfer y cómo se mueven los puntos.
+3. *(Opcional, aporte propio)* **Experimento de filtros**: por el ruido de 2.4 GHz (vs 5 GHz de MM-Fi),
+   probar **Hampel** en amplitud con/sin y decidir **por métrica** (si baja el Chamfer). NO agregar
+   DWT/PCA/Butterworth ni unwrapping de fase sin justificarlo con números (alejarse de Määttä solo si mejora).
+4. *(Pendiente de validar)* el mapeo fino índice→frecuencia de cada subportadora HT-LTF (hipótesis de
+   trabajo; no afecta la extracción de amplitud/fase).
+
+> **Diferencias clave con Määttä a documentar en la tesis:** banda **2.4 GHz** (ESP32) vs 5 GHz (Atheros);
+> tasa ~**95 Hz** directa vs 1000→100 Hz; hardware de bajo costo (ESP32) vs NIC dedicada.
+
+---
+
 ## 0. Inicio rápido — entrenar en otra PC (p. ej. la universidad)
 
-> Este repo es **autónomo**: ya incluye el **dataset** (`mmfi_dataset/`, 6 clases), el **modelo de
-> Määttä** (`tesis/modelo/`, MIT) y las **capturas crudas** de respaldo. **No hace falta descargar
-> nada más** (ni siquiera internet, salvo para instalar las librerías de Python).
+> Este repo es **autónomo**: ya incluye el **dataset** (`mmfi_dataset/`, 5 clases, persona+piso
+> aislada), el **modelo de Määttä** (`tesis/modelo/`, MIT) y las **capturas crudas** de respaldo.
+> **No hace falta descargar nada más** (ni siquiera internet, salvo para instalar las librerías de Python).
 
 **1) Clonar (o copiar) solo este repo:**
 ```bash
@@ -26,7 +53,7 @@ Estructura (todo ya viene dentro):
 ```
   tesis-csi2pc-wifi/
   ├── tesis/            ← los 3 notebooks (eda / entrenar / test) + modelo/ (MIT)
-  ├── mmfi_dataset/     ← datos listos para entrenar (CSI + Kinect, 6 clases)
+  ├── mmfi_dataset/     ← datos listos para entrenar (CSI + Kinect, 5 clases persona+piso)
   ├── capturas_crudas/  ← capturas originales (de aqui sale mmfi_dataset)
   ├── pc/               ← formateo, pipeline y visualizacion
   ├── esp32/            ← firmware de los 3 sniffers CSI
@@ -237,10 +264,14 @@ mmfi_dataset/
 ```
 
 - **3** = antenas/receptores (los 3 ESP32), **114** = subportadoras HT40, **10** = ventana temporal.
-- Preprocesamiento del CSI (igual que Määttä/MM-Fi): **media móvil** sobre el CSI complejo, luego
-  amplitud normalizada min-max `[0,1]` + fase cruda; la nube se normaliza `(x-media)/std`.
-- Clases capturadas en este trabajo (6): A01 estático, A02 brazos en cruz (abrir/cerrar),
-  A03 caminar en el sitio, A04 agacharse, A05 girar torso, A06 estirar piernas.
+- Preprocesamiento del CSI (alineado con Määttä/MM-Fi): **media móvil** sobre el CSI complejo, luego
+  amplitud normalizada min-max `[0,1]` + **fase cruda**; al entrenar se estandariza `(x-media)/std`.
+  Ver verificación del preprocesamiento vs Määttä en la sección de preprocesamiento y en `docs/`.
+- **Nubes = persona + piso aislada** (sin paredes): se quita solo la pared; en "habitación" (sin
+  persona) la nube es el piso (baseline). Aislamiento en `kinect/kinect_capture_pointcloud.py`
+  (`--solo-persona`). Captura con `--warmup` + descarte de los primeros 300 paquetes CSI (transitorio AGC).
+- **Clases capturadas en este trabajo (5):** A01 habitación (piso, baseline), A02 persona estática,
+  A03 sentadilla, A04 caminar en el sitio, A05 girar torso. (~4063 pares en total.)
 
 ---
 
