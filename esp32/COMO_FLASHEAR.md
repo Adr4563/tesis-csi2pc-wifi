@@ -77,7 +77,7 @@ triangular: router a un lado, los 3 RX separados, sujeto en el centro.
 
 ## Firmwares descartados (no usar)
 
-Dos intentos previos, documentados en `flasheo/ESTADO_FLASHEO.md`:
+Dos intentos previos (descartados):
 
 | Firmware | Rol que tenía | Por qué se descartó |
 |---|---|---|
@@ -92,6 +92,3 @@ real. Están en el historial de git si se necesitaran.
 ## Documentación relacionada
 
 - [`CONFIG.md`](CONFIG.md) — configuración del firmware y de las placas
-- [`flasheo/README.md`](flasheo/README.md) — hardware, topología de red, ajustes del router
-- [`flasheo/ESTADO_FLASHEO.md`](flasheo/ESTADO_FLASHEO.md) — bitácora: MACs, problemas y cómo se resolvieron
-- [`flasheo/CONFIGURACION_EXPERIMENTAL.md`](flasheo/CONFIGURACION_EXPERIMENTAL.md) — montaje del experimento
