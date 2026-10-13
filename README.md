@@ -243,7 +243,7 @@ de sniffear (se ve en `dmesg` como `USB disconnect` o `error -71`, y al leer el 
 `ESP-ROM:esp32s3...`). **Solución:** alimentar los ESP32 con **más voltaje / un hub USB con alimentación
 externa**. Con alimentación estable, las 3 placas se mantienen clavadas en ~92–95/s sin caerse.
 Si una placa quedó en ROM, se la saca con un **pulso de reset por software** (toggle de la línea DTR):
-el script [`pc/capturar_acciones.py`](pc/capturar_acciones.py) lo hace automáticamente antes de cada captura.
+se hace con un pulso de reset por software (toggle DTR a 115200) antes de capturar.
 
 ---
 
@@ -309,14 +309,13 @@ Tras grabarlos, arrancan solos al recibir alimentación. No hace falta tocar nad
 ### 8.3 Capturar el dataset (PC, Windows)
 ```bash
 cd pc
-# todas las acciones guiadas (resetea ESP32, cuenta 3 s, captura, empareja y formatea):
-python capturar_acciones.py
-
-# una sola acción:
-python capturar_acciones.py A03
-
-# más duración por acción (más frames):
-python capturar_acciones.py --dur 40
+# 1) capturar una sesión (CSI + Kinect) — persona+piso aislada, 150 s
+#    SOLO_PERSONA=1 aisla la persona; MAX_RANGE recorta el fondo; WARMUP descarta el inicio
+MIN_RANGE=0.5 MAX_RANGE=2.2 SOLO_PERSONA=1 WARMUP=2 python captura_sincronizada.py 150 sesion1
+# 2) emparejar las nubes con el CSI por tiempo
+python emparejar.py "...\capturas_sync\sesion1"
+# 3) formatear a MM-Fi (E01 S01 A0X, ventana 5)
+python formatear_mmfi_ma.py "...\capturas_sync\sesion1" E01 S01 A01 5
 ```
 
 ### 8.4 Entrenar y evaluar
