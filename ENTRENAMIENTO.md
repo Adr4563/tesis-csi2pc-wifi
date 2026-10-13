@@ -40,7 +40,7 @@ define estas variables si usas otras ubicaciones:
 ## Entrenar con un solo comando
 
 ```bash
-python pc/correr_todo.py
+jupyter lab   # abrir tesis/: eda_senal -> entrenar_tesis -> test_tesis (Run All)
 ```
 Corre los 3 notebooks de `tesis/` en orden, cada uno con **kernel limpio**, y
 sobrescribe `pc/resultados/`:
@@ -53,7 +53,7 @@ sobrescribe `pc/resultados/`:
 
 El orden importa: el test evalúa el `.pth` que escribe el entrenamiento.
 
-Una sola etapa: `python pc/correr_todo.py --solo entrenar`.
+Para solo entrenar: abre `tesis/entrenar_tesis.ipynb` y usa Run All.
 
 ### Opción interactiva
 Abre los notebooks de **`tesis/`** en VSCode o Jupyter y usa
@@ -75,18 +75,14 @@ En la carpeta de resultados:
 Vídeos y GIF (los genera `test_tesis.ipynb`): `video_test_completo.mp4`,
 `video_test_<ACCION>.mp4/.gif`.
 
-Un GIF por cada acción:
-```bash
-python pc/gifs_por_accion.py          # las 6 acciones
-python pc/gifs_por_accion.py A03 A05  # solo esas
-```
+Los vídeos/GIF por acción los genera `tesis/test_tesis.ipynb`.
 
 ---
 
 ## Ajustes útiles
 - Épocas, batch, lr y arquitectura: diccionario `CFG` en `tesis/entrenar_tesis.ipynb`.
 - Arquitectura del paper (512, 4+4) en vez de la oficial (256, 3+3):
-  `CSI2PC_PRESET=paper`, o `python pc/correr_todo.py --experimentos`.
+  `CSI2PC_PRESET=paper` (variable de entorno).
 - Umbrales de la métrica ICP: lista `UMBRALES` en `tesis/test_tesis.ipynb`.
 - El split (70/15/15 cronológico por acción) lo escribe el entrenamiento en
   `resultados/split.json`, y `test_tesis.ipynb` lo reutiliza para evaluar el mismo test.

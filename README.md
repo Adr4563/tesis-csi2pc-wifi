@@ -19,13 +19,13 @@ transformer que aprende a **reconstruir la nube de puntos del cuerpo humano usan
 - Preprocesamiento alineado con Määttä (amplitud min-max + fase cruda + estandarización + media móvil).
 - Extracción HT40 verificada (bloques HT-LTF, orden I/Q imag-real del firmware, hueco DC).
 - Gráficas de análisis: amplitud/fase por receptor, espectro (subportadora×tiempo), efecto del preproc.
-  (`pc/graficas_csi.py`, `pc/espectro_csi.py`, `pc/espectro_preproc.py`, `pc/verificar_ht40.py`).
+  (en el notebook de EDA: tesis/eda_senal.ipynb).
 
 **PENDIENTE (qué falta hacer):**
 1. **Entrenar el modelo** las **30 épocas** con el split de Määttä (ratio 0.8), arquitectura 256.
    En CPU son horas (medido ~12 s/batch); hacerlo en la **GPU de la universidad** (minutos).
-   Script listo: `pc/entrenar_sentadilla.py` (solo A03) o los notebooks de `tesis/` (todas las clases).
-2. **Ver resultados:** `pc/ver_sentadilla.py` → **GIF del movimiento** (GT vs predicho) + **Chamfer**
+   Se entrena con el notebook tesis/entrenar_tesis.ipynb (Run All).
+2. **Ver resultados:** tesis/test_tesis.ipynb → **GIF del movimiento** (GT vs predicho) + **Chamfer**
    en test. Revisar cuánto baja el Chamfer y cómo se mueven los puntos.
 3. *(Opcional, aporte propio)* **Experimento de filtros**: por el ruido de 2.4 GHz (vs 5 GHz de MM-Fi),
    probar **Hampel** en amplitud con/sin y decidir **por métrica** (si baja el Chamfer). NO agregar
@@ -68,14 +68,13 @@ pip install -r requirements.txt
 
 **3) Entrenar con un solo paso:**
 ```bash
-python pc/correr_todo.py
+jupyter lab   # abrir tesis/: eda_senal -> entrenar_tesis -> test_tesis (Run All)
 ```
 Eso corre los 3 notebooks en orden (EDA → entrenar → test), cada uno con kernel
-limpio, y **sobrescribe** `pc/resultados/`. Para una sola etapa:
-`python pc/correr_todo.py --solo entrenar`.
+limpio, y **sobrescribe** `pc/resultados/`.
 
 También puedes abrir los notebooks a mano desde `tesis/` (Restart Kernel and Run All).
-GIF por acción: `python pc/gifs_por_accion.py`. Detalle en [`ENTRENAMIENTO.md`](ENTRENAMIENTO.md).
+Los vídeos/GIF por acción los genera `tesis/test_tesis.ipynb`.
 
 > El modelo y el dataset se toman por defecto de dentro del repo. Para usar otros, define las
 > variables `CSI2PC_REPO` / `CSI2PC_DATA` antes de entrenar.
@@ -324,9 +323,8 @@ python capturar_acciones.py --dur 40
 
 ### 8.4 Entrenar y evaluar
 ```bash
-python pc/correr_todo.py            # EDA -> entrenar -> test (kernel limpio cada uno)
-python pc/correr_todo.py --solo test
-python pc/gifs_por_accion.py        # un GIF por accion: GT vs predicho
+jupyter lab   # abrir tesis/: eda_senal -> entrenar_tesis -> test_tesis (Run All en orden)
+# los videos/GIF del test los genera tesis/test_tesis.ipynb
 ```
 O abre los notebooks de `tesis/` a mano (Restart Kernel and Run All).
 
@@ -360,7 +358,7 @@ tesis/   los 3 notebooks (eda_senal, entrenar_tesis, test_tesis) + modelo/ (MIT)
 README.md          este archivo
 ENTRENAMIENTO.md   cómo entrenar el modelo
 requirements.txt   librerías
-pc/correr_todo.py  pipeline completo en un paso (EDA -> entrenar -> test)
+tesis/   3 notebooks: eda_senal -> entrenar_tesis -> test_tesis (Run All en orden)
 ```
 
 ---
