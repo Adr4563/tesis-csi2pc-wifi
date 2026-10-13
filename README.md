@@ -58,7 +58,7 @@ Estructura (todo ya viene dentro):
   ├── pc/               ← formateo, pipeline y visualizacion
   ├── esp32/            ← firmware de los 3 sniffers CSI
   ├── kinect/           ← captura de nubes de puntos
-  └── pi/  docs/
+  └── pi/
 ```
 
 **2) Instalar librerías** (se recomienda un entorno virtual; con GPU, ver [requirements.txt](requirements.txt)):
@@ -235,8 +235,6 @@ sudo ping -i 0.006 -s 0 192.168.0.75   # ~166 paquetes/s -> ~95-97 CSI/s tras ag
 Esto es lo que hace [`pi/flood.py`](pi/flood.py). Resultado: **~92–97 CSI/s estables** en las 3 placas,
 suficiente para capturar al sujeto **en movimiento**.
 
-> **Detalle completo** (PPDUs, A-MPDU, Mbps, comparativa UDP vs ICMP, límites de serial y
-> alimentación, sincronización): ver [`docs/RED_Y_TRAFICO.md`](docs/RED_Y_TRAFICO.md).
 
 ### Estabilidad eléctrica (caídas de los ESP32)
 Con los 3 ESP32-S3 transmitiendo a ~100/s, el consumo supera lo que entregan los puertos USB de la Pi
@@ -265,7 +263,7 @@ mmfi_dataset/
 - **3** = antenas/receptores (los 3 ESP32), **114** = subportadoras HT40, **10** = ventana temporal.
 - Preprocesamiento del CSI (alineado con Määttä/MM-Fi): **media móvil** sobre el CSI complejo, luego
   amplitud normalizada min-max `[0,1]` + **fase cruda**; al entrenar se estandariza `(x-media)/std`.
-  Ver verificación del preprocesamiento vs Määttä en la sección de preprocesamiento y en `docs/`.
+  Ver verificación del preprocesamiento vs Määttä en la sección de preprocesamiento.
 - **Nubes = persona + piso aislada** (sin paredes): se quita solo la pared; en "habitación" (sin
   persona) la nube es el piso (baseline). Aislamiento en `kinect/kinect_capture_pointcloud.py`
   (`--solo-persona`). Captura con `--warmup` + descarte de los primeros 300 paquetes CSI (transitorio AGC).
@@ -353,7 +351,6 @@ pc/      scripts de la PC (captura, emparejado, formato, entrenamiento, test, vi
 pi/      scripts de la Raspberry Pi (lectura de los ESP32 y generación de tráfico)
 kinect/  captura de nubes con Azure Kinect
 esp32/   configuración del firmware de los sniffers (esp32/CONFIG.md)
-docs/    documentación técnica (docs/RED_Y_TRAFICO.md: red, tráfico, PPDUs, ICMP, límites)
 tesis/   los 3 notebooks (eda_senal, entrenar_tesis, test_tesis) + modelo/ (MIT)
 README.md          este archivo
 ENTRENAMIENTO.md   cómo entrenar el modelo
